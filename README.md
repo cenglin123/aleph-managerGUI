@@ -10,8 +10,11 @@
 
 
 <p align="center">
-  版本: v1.0.5 | 作者: 层林尽染
+  <a href="https://github.com/cenglin123/aleph-managerGUI/releases/latest">
+    <img src="https://img.shields.io/github/v/release/cenglin123/aleph-managerGUI?label=最新版本&style=flat-square" alt="Latest Release">
+  </a> | 作者: 层林尽染
 </p>
+
 
 ---
 
@@ -173,16 +176,16 @@
 ### 文件结构
 ```
 aleph-managerGUI/
-├── aleph_managerGUI.py      			# 主程序
-├── aleph_install_guide.bat  			# 安装向导
-├── assets/                  			# 资源文件
-│   ├── aleph_managerGUI.ico 			    # 程序图标
-│   ├── aleph_init.bat       			    # 初始化脚本
-│   ├── Install-AlephWSL.ps1 			    # 完整安装脚本
-│   ├── Install-AlephWSL-Preserve.ps1 	    # 保留安装脚本
-│   └── Uninstall-WSL.ps1    			    # 卸载脚本
-└── tools/                   			# 工具目录
-    └── aleph.bat           			    # Aleph 命令包装器（自动生成）
+├── aleph_managerGUI.py                # 主程序
+├── aleph_install_guide.bat            # 安装向导
+├── assets/                            # 资源文件
+│   ├── aleph_managerGUI.ico           # 程序图标
+│   ├── aleph_init.bat                 # 初始化脚本
+│   ├── Install-AlephWSL.ps1           # 完整安装脚本
+│   ├── Install-AlephWSL-Preserve.ps1     # 保留安装脚本
+│   └── Uninstall-WSL.ps1                 # 卸载脚本
+└── tools/                             # 工具目录
+    └── aleph.bat                         # Aleph 命令包装器（自动生成）
 ```
 
 ### 故障排除
@@ -202,13 +205,13 @@ aleph-managerGUI/
 4. **WSL 相关问题**
    - 确保 Windows 版本支持 WSL2
    - 运行 `wsl --status` 检查 WSL 状态
-   - 尝试重启 WSL: `wsl --shutdown`
+   - 尝试重启 WSL，在终端中运行: `wsl --shutdown`
 
 
 
 ## 5. 安全说明 🛡️
 
-- 账户的私钥存储在 `wsl` 的 `aleph-im/private-keys/` 目录，如下图所示。
+- 账户的私钥存储在 `wsl` 的 `.aleph-im/private-keys/` 目录，如下图所示。
 - 请妥善备份您的私钥文件，私钥一旦丢失将没有任何办法寻回，不要分享你的私钥给任何人。
 
 <p align="center">
@@ -233,13 +236,14 @@ aleph-managerGUI/
 
 ## 相关链接 🔗 
 
+- [防炸教程：如何安全分享资源？](https://github.com/cenglin123/SteganographierGUI/wiki/%E9%98%B2%E7%82%B8%E6%95%99%E7%A8%8B%EF%BC%9A%E5%A6%82%E4%BD%95%E5%AE%89%E5%85%A8%E5%88%86%E4%BA%AB%E8%B5%84%E6%BA%90%EF%BC%9F)
 - [Aleph.im 官网](https://aleph.im/)
 - [IPFS 官网](https://ipfs.io/)
 - [WSL 文档](https://docs.microsoft.com/windows/wsl/)
 
 ## 作者 👨‍💻 
 
-**层林尽染**
+**[层林尽染](https://github.com/cenglin123)**
 
 ---
 
