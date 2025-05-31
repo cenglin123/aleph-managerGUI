@@ -10,10 +10,12 @@
 
 
 <p align="center">
-  <a href="https://github.com/cenglin123/aleph-managerGUI/releases/latest">
-    <img src="https://img.shields.io/github/v/release/cenglin123/aleph-managerGUI?label=最新版本&style=flat-square" alt="Latest Release">
-  </a> | 作者: 层林尽染
+  <a href="https://github.com/cenglin123/aleph-managerGUI">项目主页</a> |
+  <a href="https://github.com/cenglin123/aleph-managerGUI/releases/latest">最新版本</a> |
+  作者：层林尽染
 </p>
+
+
 
 
 ---
