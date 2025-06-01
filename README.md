@@ -11,12 +11,14 @@
 
 <p align="center">
   <a href="https://github.com/cenglin123/aleph-managerGUI">项目主页</a> |
-  <a href="https://github.com/cenglin123/aleph-managerGUI/releases/latest">最新版本</a> |
+  <a href="https://github.com/cenglin123/aleph-managerGUI/releases/latest">最新版本下载</a> |
   作者：层林尽染
 </p>
 
 
-![1PGBq.jpg](https://pic.cangku.moe/images/2025/06/01/1PGBq.jpg)
+<p align="center">
+  <img src="imgs/interface.jpg" alt="Aleph Manager Icon">
+</p>
 
 ---
 
