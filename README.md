@@ -16,11 +16,7 @@
 </p>
 
 
-<<<<<<< HEAD
 ![1PGBq.jpg](https://pic.cangku.moe/images/2025/06/01/1PGBq.jpg)
-=======
-
->>>>>>> 04af2907f56192eec70a6824941a5391010a07af
 
 ---
 
