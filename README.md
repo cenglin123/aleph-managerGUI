@@ -1,3 +1,5 @@
+
+
 # Aleph 分享助手
 
 <p align="center">
@@ -22,214 +24,239 @@
 
 ---
 
-##  1. 功能特点 📋
+## 1. 功能特点 📋
 
 - **账户管理**
-  - 创建新的 Aleph.im 账户
-  - 切换活跃账户
-  - 删除不需要的账户
-  - 实时刷新账户列表
-  - 显示账户文件详情（JSON 格式）
-
+    
+    - 创建新的 Aleph.im 账户
+        
+    - 切换活跃账户
+        
+    - 删除不需要的账户
+        
+    - 实时刷新账户列表
+        
+    - 显示账户文件详情（JSON 格式）
+        
 - **CID 操作**
-  - 批量 Pin CID 到 Aleph 网络
-  - 支持 CID v0 (`Qm`开头) 和 CID v1 (`bafy`开头) 格式
-  - 自动转换 CID v1 到 v0 格式
-  - 批量删除文件（支持按 CID 或 item_hash）
-  - 智能识别输入类型（CID/item_hash）
-
+    
+    - 批量 Pin CID 到 Aleph 网络
+        
+    - 支持 CID v0 (`Qm` 开头) 和 CID v1 (`bafy` 开头) 格式
+        
+    - 自动转换 CID v1 到 v0 格式
+        
+    - 批量删除文件（支持按 CID 或 item_hash）
+        
+    - 智能识别输入类型（CID / item_hash）
+        
 - **用户友好界面**
-  - 简洁直观的图形界面
-  - 实时操作日志显示
-  - 支持剪贴板粘贴
-  - 操作状态实时反馈
-  - 支持多行批量输入
+    
+    - 简洁直观的图形界面
+        
+    - 实时操作日志显示
+        
+    - 支持剪贴板粘贴
+        
+    - 操作状态实时反馈
+        
+    - 支持多行批量输入
+        
 
-
+---
 
 ## 2. 快速开始 🚀
 
 ### 系统要求
 
-- Windows 10/11 (需要支持 WSL2)
-- Python 3.7+ (如果从源码运行的话)
-- WSL2 + Ubuntu
-- IPFS Desktop 或 IPFS 守护进程（可选，如果不需要转换 CID 也可以不用）
+- Windows 10 / 11
+    
+- Python 3.8+（若从源码运行）
+    
+- IPFS Desktop 或 IPFS 守护进程（用于 CID 转换）
+    
+
+---
 
 ### 安装步骤
 
-#### 方式一：使用自动安装向导（推荐）
+#### 方式一：直接使用打包版本（推荐）
 
-1. **下载项目文件**
-   
-   ```bash
-   git clone https://github.com/cenglin123/aleph-managerGUI.git
-   cd aleph-managerGUI
-   ```
-   
-2. **运行安装向导**
-   
-   - 右键 `aleph_install_guide.bat`，选择"以管理员身份运行"
-   - 根据提示选择安装模式：
-     - `[1] 完整安装` - 全新安装 WSL、Ubuntu 和 Aleph.im （如果之前没有安装过 `wsl` 需要重启电脑，重启后再次执行此模式）
-     - `[2] 保留安装` - 在现有 Ubuntu 上安装 Aleph.im
-     - `[3] 卸载程序` - 卸载 WSL（慎用）
-   
-3. **初始化 Aleph**
-   - 安装完成后会自动运行初始化脚本
-   - 如果没有自动初始化，也可以手动运行 `assets/aleph_init.bat` 以完成初始化
-
-#### 方式二：手动安装
-
-1. **安装 WSL2 和 Ubuntu**
-   
-   ```powershell
-   # 启用 WSL
-   wsl --install
-   
-   # 安装 Ubuntu
-   wsl --install -d Ubuntu
-   ```
-   
-2. **在 Ubuntu 中安装 Aleph.im**
-   
-   ```bash
-   # 更新系统
-   sudo apt update && sudo apt upgrade -y
-   
-   # 安装 Python 和 pip
-   sudo apt-get install -y python3-pip libsecp256k1-dev
-   sudo apt install pipx
-   pipx ensurepath
-   
-   # 安装 aleph-client（此过程需要耐心等待）
-   pip3 install aleph-client
-   ```
-   
-3. **安装 IPFS**
-   
-   - 下载并安装 [IPFS Desktop](https://docs.ipfs.tech/install/ipfs-desktop/)
-   - 或使用命令行版本 IPFS
-   
-4. **运行程序**
-   
-   - 方式一：运行打包好的 exe 文件（在 [release](https://github.com/cenglin123/aleph-managerGUI/releases/latest) 中可以找到）
-   - 方式二：使用 Python 运行源码
-     ```bash
-     python aleph_managerGUI.py
-     ```
-
-5. **其他可用指令**
-
-    ```bash
-    # 列出所有 wsl 版本
-    wsl --list --verbose
+1. **下载最新版本**
     
-    # 卸载旧版本
-    wsl --unregister Ubuntu
+    - 从 [Releases 页面](https://github.com/cenglin123/aleph-managerGUI/releases/latest) 下载最新的 `Aleph_ManagerGUI.zip`
+        
+    - 解压后即可使用。
+        
+2. **初始化 Aleph 环境**
     
-    # 检查 aleph 安装情况
-    which aleph
-    ```
+    - 解压后的 `tools` 目录中包含 `aleph_py.exe`（Windows 版命令行客户端）
+        
+    - 程序首次运行时会提示初始化，引导创建默认账户，账户的密钥存储于程序路径 `.\tools\alpeh_py\.aleph-im\private-keys\` 
+        
+3. **启动程序**
+    
+    - 直接运行 `aleph_managerGUI.exe`
+        
+    - 或从命令行运行：
+        
+        ```powershell
+        .\aleph_managerGUI.exe
+        ```
+        
 
+---
 
+#### 方式二：安装包安装
 
-## 3.使用指南 📖
+（待开发）
+
+---
+
+### 可选：IPFS 支持
+
+- 下载并安装 [IPFS Desktop](https://docs.ipfs.tech/install/ipfs-desktop/)，或者 [IPFS 分享助手](https://github.com/cenglin123/IPFS-ShareAssistant)。
+    
+- 上述程序启动后会在后台运行 IPFS 节点
+    
+- Aleph 分享助手可自动检测并使用本地 IPFS 节点来转换 CID
+    
+
+---
+
+## 3. 使用指南 📖
 
 ### 账户管理
 
 1. **创建账户**
-   - 在"创建新账户"输入框中输入账户名
-   - 点击【创建】按钮
-   - 系统会自动生成私钥并配置为默认账户
-
+    
+    - 在“创建新账户”输入框中输入账户名
+        
+    - 点击【创建】按钮
+        
+    - 程序会生成私钥文件并配置为默认账户，账户密钥默认路径 `.\tools\alpeh_py\.aleph-im\private-keys\` 
+        
 2. **切换账户**
-   - 从下拉列表选择要切换的账户
-   - 点击"切换账户"按钮
-   - 系统会更新默认配置
+    
+    - 从下拉列表中选择目标账户
+        
+    - 点击“切换账户”即可更新默认配置
+        
+3. **查看账户文件**
+    
+    - 点击“显示账户文件”查看当前账户的全部文件
+        
+    - 显示文件哈希、大小、类型、创建时间等信息
+        
 
-3. **查看文件列表**
-   - 点击"显示账户文件"查看当前账户的所有文件
-   - 信息包括文件哈希、大小、类型、创建时间等
+---
 
 ### CID 操作
 
 1. **Pin 文件**
-   - 在文本框中输入 CID（支持多行批量输入）
-   - 支持格式：
-     - CID v0: `QmXxxxx...`（46字符）
-     - CID v1: `bafyxxxx...`（会自动转换）
-   - 点击【PIN】按钮开始上传
-   - 成功的 CID 会自动从输入框移除
-
+    
+    - 在输入框中输入 CID（可多行输入）
+        
+    - 支持格式：
+        
+        - CID v0：`Qm...`
+            
+        - CID v1：`bafybei...`（如果输入 v0 格式，程序会自动转换）
+            
+    - 点击【PIN】按钮开始上传
+        
 2. **删除文件**
-   - 输入要删除的 CID 或 item_hash
-   - 点击"删除"按钮
-   - 如果一个 CID 对应多个文件，会弹出选择对话框
+    
+    - 输入要删除的 CID 或 item_hash
+        
+    - 点击【删除】
+        
+    - 若同一个 CID 对应多个文件，会弹出选择框
+        
+
+---
 
 ### 快捷操作
 
-- **粘贴**: 从剪贴板粘贴 CID
-- **清空**: 清空输入框内容
-- **关于IPFS↗**: 打开本地 IPFS Gateway
+- **粘贴**：支持从剪贴板粘贴 CID
+    
+- **清空**：清空输入框
+    
+- **关于 IPFS ↗**：打开本地 IPFS 网关
+    
 
+---
 
+## 4. 文件结构 🔧
 
-## 4. 配置说明 🔧
-
-### 文件结构
 ```
 aleph-managerGUI/
-├── aleph_managerGUI.py                # 主程序
-├── aleph_install_guide.bat            # 安装向导
-├── assets/                            # 资源文件
-│   ├── aleph_managerGUI.ico           # 程序图标
-│   ├── aleph_init.bat                 # 初始化脚本
-│   ├── Install-AlephWSL.ps1           # 完整安装脚本
-│   ├── Install-AlephWSL-Preserve.ps1     # 保留安装脚本
-│   └── Uninstall-WSL.ps1                 # 卸载脚本
-└── tools/                             # 工具目录
-    └── aleph.bat                         # Aleph 命令包装器（自动生成）
+├── aleph_managerGUI.exe          # 图形界面程序
+├── assets/                       # 资源文件
+│   ├── aleph_managerGUI.ico      # 程序图标
+└── tools/                        # 工具目录
+    ├── aleph_py/                 # Aleph 命令行客户端目录
+    │   └── aleph_py.exe          # Windows 版 Aleph 命令行客户端
+    └── private-keys/             # 私钥存储目录
 ```
 
-### 故障排除
+---
 
-1. **"找不到 aleph.bat 文件"**
-   - 运行 `assets/aleph_init.bat` 进行初始化
-   - 确保 WSL 和 Aleph 已正确安装
+## 5. 故障排除 ⚙️
 
-2. **"IPFS 未启动"错误**
-   - 确保 IPFS Desktop 正在运行
-   - 或在终端运行 `ipfs daemon`
-
+1. **找不到 `aleph_py.exe`**
+    
+    - 确保 `tools/` 目录存在且包含 `aleph_py.exe`
+        
+    - 若缺失，可重新下载 Release 包或运行初始化脚本
+        
+2. **IPFS 未启动**
+    
+    - 确保 IPFS Desktop 正在运行
+        
+    - 或手动启动：
+        
+        ```bash
+        ipfs daemon
+        ```
+        
 3. **CID 转换失败**
-   - 确保 IPFS 守护进程正在运行
-   - 检查 CID 格式是否正确
+    
+    - 检查 CID 格式是否正确
+        
+    - 确认 IPFS 节点可访问
+        
 
-4. **WSL 相关问题**
-   - 确保 Windows 版本支持 WSL2
-   - 运行 `wsl --status` 检查 WSL 状态
-   - 尝试重启 WSL，在终端中运行: `wsl --shutdown`
+---
 
+## 6. 安全说明 🛡️
 
-
-## 5. 安全说明 🛡️
-
-- 账户的私钥存储在 `wsl` 的 `.aleph-im/private-keys/` 目录，如下图所示。
-- 请妥善备份您的私钥文件，私钥一旦丢失将没有任何办法寻回，不要分享你的私钥给任何人。
+- 私钥文件存放于程序目录下的 `.aleph-im/private-keys/`
+    
+- 请妥善备份私钥文件，**丢失将无法恢复账户访问权限**
+    
+- 不要与他人分享私钥内容
 
 <p align="center">
   <img src="imgs/about_private-key.jpg" alt="about_private-key">
 </p>
 
+---
 
-## 6. 更新日志 📝
+## 7. 更新日志 📝
 
-### v1.0.5
-- 首次发布
+### v1.0.6（当前版本）
 
+- 移除 WSL 依赖，全面支持 Windows 原生运行
+    
+- 新增 `aleph_py.exe` 内置命令行客户端
+    
+- 优化私钥路径管理与编码兼容性
+    
+- 加快启动速度（使用 onedir 打包）
+    
 
-
+---
 ## 贡献 🤝
 
 欢迎提交 Issue 和 Pull Request！
