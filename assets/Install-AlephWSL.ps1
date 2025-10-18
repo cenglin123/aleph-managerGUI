@@ -106,12 +106,12 @@ if ($restartRequired) {
 # 使用 wsl --status 或其他方法测试 WSL 是否可用
 try {
     # 方法1: 使用 wsl --status (适用于较新版本的WSL)
-    wsl --status 2>&1
+    wsl --status 2>$null
     if ($LASTEXITCODE -eq 0) {
         Write-ColoredText "WSL is working correctly (detected via --status). Proceeding with installation." "Green"
     } else {
         # 方法2: 使用 wsl --help 来测试WSL基本功能
-        $wslHelp = wsl --help 2>&1
+        $wslHelp = wsl --help 2>$null
         if ($wslHelp -match "Windows Subsystem for Linux" -or $wslHelp -match "用法:") {
             Write-ColoredText "WSL is working correctly (detected via --help). Proceeding with installation." "Green"
         } else {
@@ -121,7 +121,7 @@ try {
 } catch {
     # 方法3: 备用检测 - 检查WSL命令是否可执行
     try {
-        $wslVersion = wsl --version 2>&1
+        $wslVersion = wsl --version 2>$null
         if ($wslVersion -match "WSL" -or $LASTEXITCODE -eq 0) {
             Write-ColoredText "WSL is working correctly (detected via --version). Proceeding with installation." "Green"
         } else {
@@ -242,7 +242,7 @@ Start-Sleep -Seconds 15
 function Test-UbuntuInstalled {
     try {
         # 尝试直接访问Ubuntu来检测是否安装
-        wsl -d Ubuntu -- echo "test" 2>&1
+        wsl -d Ubuntu -- echo "test" 2>$null
         return ($LASTEXITCODE -eq 0)
     } catch {
         return $false
@@ -291,19 +291,23 @@ while ($userCheckAttempt -lt $maxUserCheckAttempts -and -not $currentUser) {
     Write-ColoredText "Attempting to detect current user (attempt $userCheckAttempt)..." "Yellow"
     
     try {
-        # 首先启动Ubuntu（如果已停止）
-        wsl -d Ubuntu -- echo "starting" 2>&1 | Out-Null
+        # 首先确保Ubuntu正在运行
+        $startResult = & wsl -d Ubuntu -- echo "starting" 2>$null
         Start-Sleep -Seconds 2
         
-        # 尝试获取用户名
-        $userResult = wsl -d Ubuntu -- whoami 2>&1
+        # 尝试获取用户名 - 修复：使用更安全的错误处理
+        $userResult = & wsl -d Ubuntu -- whoami 2>$null
         
         # 检查结果是否有效
         if ($LASTEXITCODE -eq 0 -and $userResult) {
             # 安全地处理字符串
-            $userString = $userResult | Out-String
-            if ($userString -and $userString.Trim() -ne "") {
-                $currentUser = $userString.Trim()
+            if ($userResult -is [string]) {
+                $currentUser = $userResult.Trim()
+            } elseif ($userResult -is [array] -and $userResult.Count -gt 0) {
+                $currentUser = $userResult[0].ToString().Trim()
+            }
+            
+            if ($currentUser -and $currentUser -ne "") {
                 Write-ColoredText "Detected current user: $currentUser" "Green"
                 break
             }
@@ -324,7 +328,7 @@ if (-not $currentUser) {
     
     try {
         # 方法1: 尝试使用 id 命令
-        $idResult = wsl -d Ubuntu -- id -un 2>&1
+        $idResult = & wsl -d Ubuntu -- id -un 2>$null
         if ($LASTEXITCODE -eq 0 -and $idResult) {
             $idString = $idResult | Out-String
             if ($idString -and $idString.Trim() -ne "") {
@@ -339,7 +343,7 @@ if (-not $currentUser) {
     # 方法2: 检查环境变量
     if (-not $currentUser) {
         try {
-            $envResult = wsl -d Ubuntu -- bash -c 'echo $USER' 2>&1
+            $envResult = & wsl -d Ubuntu -- bash -c 'echo $USER' 2>$null
             if ($LASTEXITCODE -eq 0 -and $envResult) {
                 $envString = $envResult | Out-String
                 if ($envString -and $envString.Trim() -ne "") {
@@ -447,7 +451,7 @@ while ($verifyAttempt -lt $maxVerifyAttempts -and -not $userCreated) {
     Write-ColoredText "User verification attempt $verifyAttempt..." "Yellow"
     
     try {
-        $userCheck = wsl -d Ubuntu -- id -u alephGui 2>&1
+        $userCheck = wsl -d Ubuntu -- id -u alephGui 2>$null
         if ($LASTEXITCODE -eq 0 -and $userCheck -match "^\d+$") {
             Write-ColoredText "SUCCESS: User alephGui created successfully with UID: $userCheck" "Green"
             $userCreated = $true
@@ -458,15 +462,15 @@ while ($verifyAttempt -lt $maxVerifyAttempts -and -not $userCreated) {
                 
                 # 再次尝试创建用户
                 try {
-                    $retryUser = wsl -d Ubuntu -- whoami 2>&1
+                    $retryUser = wsl -d Ubuntu -- whoami 2>$null
                     if ($retryUser.Trim() -eq "root") {
-                        wsl -d Ubuntu -- useradd -m -s /bin/bash alephGui 2>/dev/null
+                        wsl -d Ubuntu -- useradd -m -s /bin/bash alephGui 2>$null
                         wsl -d Ubuntu -- bash -c "echo 'alephGui:alephGui!' | chpasswd"
                         wsl -d Ubuntu -- usermod -aG sudo alephGui
                         wsl -d Ubuntu -- bash -c "echo 'alephGui ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/alephGui"
                         wsl -d Ubuntu -- bash -c "echo -e '[user]\ndefault=alephGui' > /etc/wsl.conf"
                     } else {
-                        wsl -d Ubuntu -- sudo useradd -m -s /bin/bash alephGui 2>/dev/null
+                        wsl -d Ubuntu -- sudo useradd -m -s /bin/bash alephGui 2>$null
                         wsl -d Ubuntu -- sudo bash -c "echo 'alephGui:alephGui!' | chpasswd"
                         wsl -d Ubuntu -- sudo usermod -aG sudo alephGui
                         wsl -d Ubuntu -- sudo bash -c "echo 'alephGui ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/alephGui"
@@ -493,7 +497,7 @@ if ($userCreated) {
     
     # 验证默认用户设置
     try {
-        $defaultUserCheck = wsl -d Ubuntu -- bash -c "grep 'default=' /etc/wsl.conf 2>/dev/null || echo 'not set'"
+        $defaultUserCheck = & wsl -d Ubuntu -- bash -c "grep 'default=' /etc/wsl.conf 2>/dev/null || echo 'not set'"
         if ($defaultUserCheck -match "alephGui") {
             Write-ColoredText "Default user is correctly set to alephGui." "Green"
         } else {
@@ -568,18 +572,11 @@ if ($userCreated) {
     wsl -d Ubuntu -u alephGui -- sudo apt install -y pipx
 
     # 确保 pipx 在 PATH，并一步完成：install + inject click==8.1.7
-    wsl -d Ubuntu -u alephGui -- bash -lc `
-      "pipx ensurepath && \
-       pipx install aleph-client && \
-       pipx inject aleph-client click==8.1.7"
+    wsl -d Ubuntu -u alephGui -- bash -lc "pipx ensurepath && pipx install aleph-client && pipx inject aleph-client click==8.1.7"
 
     if ($LASTEXITCODE -ne 0) {
         Write-ColoredText "Aleph-client 安装或注入 click 失败，尝试备用方案..." "Yellow"
-        wsl -d Ubuntu -u alephGui -- bash -lc `
-          "python3 -m pip install --user pipx && \
-           pipx ensurepath && \
-           pipx install aleph-client && \
-           pipx inject aleph-client click==8.1.7"
+    wsl -d Ubuntu -u alephGui -- bash -lc "python3 -m pip install --user pipx && pipx ensurepath && pipx install aleph-client && pipx inject aleph-client click==8.1.7"
     }
 
     # 创建测试文件

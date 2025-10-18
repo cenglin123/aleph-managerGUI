@@ -1,0 +1,2 @@
+[console_scripts]
+aleph = aleph_client.__main__:app

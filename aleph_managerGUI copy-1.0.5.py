@@ -18,7 +18,7 @@ else:  # 在开发环境中运行
 class AlephManager:
     def __init__(self, root):
         self.root = root
-        self.root.title("Aleph 分享助手-v1.1.0-作者：层林尽染")
+        self.root.title("Aleph 分享助手-v1.0.5-作者：层林尽染")
         self.root.geometry("700x720")
         self.app_path = application_path
 
@@ -27,8 +27,8 @@ class AlephManager:
         if os.path.exists(self.icon_path):
             self.root.iconbitmap(self.icon_path)
 
-        # 设置 aleph_py.exe 文件的路径
-        self.aleph_exe_path = os.path.join(self.app_path, "tools", "aleph_py", "aleph_py.exe")
+        # 设置 aleph.bat 文件的路径
+        self.aleph_bat_path = os.path.join(self.app_path, "tools", "aleph.bat")
 
         # 创建一个样式
         style = ttk.Style()
@@ -127,14 +127,14 @@ class AlephManager:
     def run_command(self, command, input_text=None):
         """运行命令并返回输出"""
         self.log("执行命令: " + " ".join(command) if isinstance(command, list) else command)
-
+        
         # 检测命令中是否包含 --json 参数
         has_json_flag = False
         if isinstance(command, list):
             has_json_flag = "--json" in command
         elif isinstance(command, str):
             has_json_flag = "--json" in command.split()
-
+        
         try:
             # 确保命令是适当的格式
             if isinstance(command, str):
@@ -148,12 +148,7 @@ class AlephManager:
                 startupinfo = subprocess.STARTUPINFO()
                 startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
                 startupinfo.wShowWindow = subprocess.SW_HIDE
-
-            # 设置环境变量以支持 UTF-8 编码
-            env = os.environ.copy()
-            env["PYTHONIOENCODING"] = "utf-8"
-            env["PYTHONUTF8"] = "1"
-
+                    
             # 创建进程，明确指定编码为utf-8
             process = subprocess.Popen(
                 command,
@@ -162,8 +157,7 @@ class AlephManager:
                 stderr=subprocess.PIPE,
                 text=False,  # 使用二进制模式
                 shell=shell,
-                startupinfo=startupinfo,  # 添加startupinfo参数
-                env=env  # 添加环境变量
+                startupinfo=startupinfo  # 添加startupinfo参数
             )
             
             # 如果有输入文本，需要将其编码
@@ -209,10 +203,9 @@ class AlephManager:
                 input_text = f"{account_name}\n\n"
 
                 # 两种命令：先带 --key-format，再无参数
-                cmd_withkey = [self.aleph_exe_path, "account", "create",
-                            "--key-format", "hexadecimal"
-                            ]
-                cmd_plain   = [self.aleph_exe_path, "account", "create"]
+                cmd_withkey = [self.aleph_bat_path, "account", "create",
+                            "--key-format", "hexadecimal"]
+                cmd_plain   = [self.aleph_bat_path, "account", "create"]
 
                 # ---------- 第 1 步：先带参数 ----------
                 stdout, stderr, rc = self.run_command(cmd_withkey, input_text=input_text)
@@ -258,7 +251,7 @@ class AlephManager:
                     startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
                     startupinfo.wShowWindow = subprocess.SW_HIDE
                 
-                command = [self.aleph_exe_path, "account", "list"]
+                command = [self.aleph_bat_path, "account", "list"]
                 stdout, stderr, returncode = self.run_command(command)
                 
                 if returncode == 0 and stdout:
@@ -325,7 +318,7 @@ class AlephManager:
                 self.status_var.set(f"正在切换到账户: {account_name}...")
                 
                 # 首先获取当前活动账户和可用账户列表
-                command = [self.aleph_exe_path, "account", "list"]
+                command = [self.aleph_bat_path, "account", "list"]
                 stdout, stderr, returncode = self.run_command(command)
                 
                 if returncode != 0:
@@ -399,7 +392,7 @@ class AlephManager:
                 self.log(f"使用索引 {target_index} 切换到账户 {account_name}")
                 
                 # 运行配置命令
-                command = [self.aleph_exe_path, "account", "config"]
+                command = [self.aleph_bat_path, "account", "config"]
                 # 构建输入序列：n（不保留当前私钥）+ 索引号 + 回车（接受默认链）
                 input_text = f"n\n{target_index}\n\n"
                 
@@ -417,7 +410,7 @@ class AlephManager:
                         wsl_username = self.get_wsl_username()
                         key_path = f"/home/{wsl_username}/.aleph-im/private-keys/{account_name}.key"
                         
-                        command = [self.aleph_exe_path, "account", "config", key_path, "ETH"]
+                        command = [self.aleph_bat_path, "account", "config", key_path, "ETH"]
                         stdout, stderr, returncode = self.run_command(command)
                         
                         if returncode == 0:
@@ -520,7 +513,7 @@ class AlephManager:
                     command = f"wsl rm -f \"{alt_path}\""
                     self.run_command(command)
                     # 可能需要强制刷新 aleph 配置
-                    command = [self.aleph_exe_path, "account", "config", account_name == "cenglin123" and "cenglin1231" or "cenglin123"]
+                    command = [self.aleph_bat_path, "account", "config", account_name == "cenglin123" and "cenglin1231" or "cenglin123"]
                     self.run_command(command)
                     self.root.after(1000, self.refresh_accounts)
             except Exception as e:
@@ -533,13 +526,29 @@ class AlephManager:
         thread.start()
 
     def get_wsl_username(self):
-        """获取用户名（从环境变量获取）"""
+        """获取WSL用户名（优先使用 whoami，失败则尝试从 aleph.bat 中提取）"""
         try:
-            # 从系统环境变量获取当前用户名
-            return os.getenv('USERNAME', 'default_user')
+            # 方法1: 使用 whoami
+            command = "wsl whoami"
+            stdout, stderr, returncode = self.run_command(command)
+            if returncode == 0 and stdout:
+                username = stdout.strip().split('\\')[-1]
+                self.log(f"WSL用户名: {username}")
+                return username
+
+            # 方法2: 从 aleph.bat 中提取
+            if os.path.exists(self.aleph_bat_path):
+                with open(self.aleph_bat_path, "r") as f:
+                    content = f.read()
+                    match = re.search(r'/home/(\w+)/', content)
+                    if match:
+                        username = match.group(1)
+                        self.log(f"从 aleph.bat 获取到 WSL 用户名: {username}")
+                        return username
+            return "cenglin123"
         except Exception as e:
-            self.log(f"获取用户名时出错: {str(e)}")
-            return "default_user"
+            self.log(f"获取 WSL 用户名时出错: {str(e)}")
+            return "cenglin123"
 
     # 添加显示文件列表方法
     def show_file_list(self):
@@ -555,7 +564,7 @@ class AlephManager:
                 self.log("-" * 80)
                 
                 # 执行 aleph file list --json 命令获取JSON格式输出
-                command = [self.aleph_exe_path, "file", "list", "--json"]
+                command = [self.aleph_bat_path, "file", "list", "--json"]
                 stdout, stderr, returncode = self.run_command(command)
                 
                 if returncode == 0 and stdout:
@@ -845,7 +854,7 @@ class AlephManager:
                         cid = converted_cid
 
                     # 执行 Pin 操作
-                    command = [self.aleph_exe_path, "file", "pin", cid]
+                    command = [self.aleph_bat_path, "file", "pin", cid]
                     stdout, stderr, returncode = self.run_command(command)
                     if returncode == 0:
                         success_msg = f"成功 Pin CID ({i+1}/{total_cids}): {cid}"
@@ -931,7 +940,7 @@ class AlephManager:
                 self.log(f"正在获取文件列表以准备删除{len(input_items)}个CID/item_hash")
                 
                 # 获取文件列表
-                command = [self.aleph_exe_path, "file", "list", "--json"]
+                command = [self.aleph_bat_path, "file", "list", "--json"]
                 stdout, stderr, returncode = self.run_command(command)
                 
                 if returncode != 0 or not stdout:
@@ -1082,7 +1091,7 @@ class AlephManager:
                                 item_hash_to_delete = item_info['item_hash']
                                 self.log(f"找到单个匹配项，正在删除 item_hash: {item_hash_to_delete}")
                                 
-                                delete_command = [self.aleph_exe_path, "file", "forget", item_hash_to_delete]
+                                delete_command = [self.aleph_bat_path, "file", "forget", item_hash_to_delete]
                                 delete_stdout, delete_stderr, delete_returncode = self.run_command(delete_command)
                                 
                                 if delete_returncode == 0:
@@ -1169,7 +1178,7 @@ class AlephManager:
                                         item_hash_to_delete = item_info['item_hash']
                                         self.log(f"正在删除 item_hash: {item_hash_to_delete}")
                                         
-                                        delete_command = [self.aleph_exe_path, "file", "forget", item_hash_to_delete]
+                                        delete_command = [self.aleph_bat_path, "file", "forget", item_hash_to_delete]
                                         delete_stdout, delete_stderr, delete_returncode = self.run_command(delete_command)
                                         
                                         if delete_returncode == 0:
@@ -1196,7 +1205,7 @@ class AlephManager:
                                             item_hash_to_delete = item_info['item_hash']
                                             self.log(f"用户选择删除序号 {idx+1}, item_hash: {item_hash_to_delete}")
                                             
-                                            delete_command = [self.aleph_exe_path, "file", "forget", item_hash_to_delete]
+                                            delete_command = [self.aleph_bat_path, "file", "forget", item_hash_to_delete]
                                             delete_stdout, delete_stderr, delete_returncode = self.run_command(delete_command)
                                             
                                             if delete_returncode == 0:
@@ -1277,16 +1286,17 @@ class AlephManager:
 
 def main():
     root = tk.Tk()
+    
+    # 先构建 aleph_bat_path 路径
+    aleph_bat_path = os.path.join(application_path, "tools", "aleph.bat")
 
-    # 先构建 aleph_py.exe 路径
-    aleph_exe_path = os.path.join(application_path, "tools", "aleph_py", "aleph_py.exe")
-
-    # 检查 aleph_py.exe 是否存在
-    if not os.path.exists(aleph_exe_path):
+    # 检查 aleph.bat 是否存在
+    if not os.path.exists(aleph_bat_path):
         messagebox.showerror(
             "错误",
-            "在 tools\\aleph_py 目录下找不到 aleph_py.exe 文件！\n\n"
-            "请确保 aleph_py.exe 文件在本程序目录下的 tools\\aleph_py 文件夹中。"
+            "在 tools 目录下找不到 aleph.bat 文件！\n\n"
+            "请先执行 aleph_init.bat 文件进行初始化。\n"
+            "并确保 aleph.bat 文件在本程序目录下的 tools 文件夹中。"
         )
         return
     

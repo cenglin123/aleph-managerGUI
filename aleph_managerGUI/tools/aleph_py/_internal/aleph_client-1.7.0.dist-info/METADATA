@@ -1,0 +1,176 @@
+Metadata-Version: 2.4
+Name: aleph-client
+Version: 1.7.0
+Summary: Python Client library for the Aleph.im network
+Project-URL: Discussions, https://community.aleph.im/
+Project-URL: Documentation, https://docs.aleph.im/tools/aleph-client/
+Project-URL: Issues, https://github.com/aleph-im/aleph-client/issues
+Project-URL: Source, https://github.com/aleph-im/aleph-client
+Author-email: "Aleph.im Team" <hello@aleph.im>
+License: The MIT License (MIT)
+        
+        Copyright (c) 2019 Aleph.im project
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+License-File: AUTHORS.rst
+License-File: LICENSE.txt
+Keywords: Aleph.im,Client,Library,Python
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Console
+Classifier: Framework :: aiohttp
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: System :: Distributed Computing
+Requires-Python: >=3.9
+Requires-Dist: aiodns==3.2
+Requires-Dist: aiohttp==3.11.13
+Requires-Dist: aleph-message>=1.0.5
+Requires-Dist: aleph-sdk-python>=2.1
+Requires-Dist: base58==2.1.1
+Requires-Dist: click<8.2
+Requires-Dist: py-sr25519-bindings==0.2
+Requires-Dist: pydantic>=2
+Requires-Dist: pygments==2.19.1
+Requires-Dist: pynacl==1.5
+Requires-Dist: python-magic==0.4.27
+Requires-Dist: rich==13.9.*
+Requires-Dist: setuptools>=65.5
+Requires-Dist: substrate-interface==1.7.11
+Requires-Dist: textual==0.73
+Requires-Dist: typer==0.15.2
+Provides-Extra: cosmos
+Requires-Dist: cosmospy==6; extra == 'cosmos'
+Provides-Extra: docs
+Requires-Dist: sphinxcontrib-plantuml==0.30; extra == 'docs'
+Provides-Extra: ethereum
+Requires-Dist: eth-account>=0.4; extra == 'ethereum'
+Provides-Extra: nuls2
+Requires-Dist: aleph-nuls2==0.1; extra == 'nuls2'
+Provides-Extra: polkadot
+Requires-Dist: substrate-interface==1.7.11; extra == 'polkadot'
+Provides-Extra: solana
+Requires-Dist: base58==2.1.1; extra == 'solana'
+Requires-Dist: pynacl==1.5; extra == 'solana'
+Provides-Extra: tezos
+Requires-Dist: aleph-pytezos==3.13.4; extra == 'tezos'
+Requires-Dist: pynacl==1.5; extra == 'tezos'
+Description-Content-Type: text/markdown
+
+# aleph-client
+
+Python Client for the [aleph.im network](https://www.aleph.im), next generation network of
+decentralized big data applications. Development follows the [Aleph
+Whitepaper](https://github.com/aleph-im/aleph-whitepaper).
+
+## Documentation
+
+Documentation can be found on https://docs.aleph.im/tools/aleph-client/
+
+## Requirements
+
+### Linux
+
+Some cryptographic functionalities use curve secp256k1 and require
+installing [libsecp256k1](https://github.com/bitcoin-core/secp256k1).
+
+> apt-get install -y python3-pip libsecp256k1-dev squashfs-tools
+
+### macOs
+
+> brew tap cuber/homebrew-libsecp256k1
+> brew install libsecp256k1
+
+### Windows
+
+We recommend using [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) (Windows Subsystem for Linux).
+
+## Installation
+
+### From PyPI
+
+Using pip and [PyPI](https://pypi.org/project/aleph-client/):
+
+> pip install aleph-client
+
+### Using a container
+
+Use the Aleph client and it\'s CLI from within Docker or Podman with:
+
+> docker run --rm -ti -v $(pwd)/<data:/data> ghcr.io/aleph-im/aleph-client/aleph-client:master --help
+
+Warning: This will use an ephemeral key pair that will be discarded when
+stopping the container
+
+## Installation for development
+
+We recommend using [hatch](https://hatch.pypa.io/) for development.
+
+Hatch is a modern, extensible Python project manager. 
+It creates a virtual environment for each project and manages dependencies.
+
+> pip install hatch
+ 
+### Running tests
+
+> hatch test
+
+or
+
+> hatch run testing:cov
+
+### Formatting code
+
+> hatch run linting:fmt
+
+### Checking types
+
+> hatch run linting:typing
+
+## Publish to PyPI
+
+> hatch build
+> hatch upload
+
+If you want NULS2 support you will need to install nuls2-python
+(currently only available on github):
+
+> pip install aleph-sdk-python[nuls2]
+
+To install from source and still be able to modify the source code:
+
+> pip install -e .
+
+## Updating the User Documentation
+
+The user documentation for Aleph is maintained in the [aleph-docs](https://github.com/aleph-im/aleph-docs) repository. The CLI page is generated using the `typer` command. When releasing a new version, it's important to update the documentation as part of the release process.
+
+If you have the `aleph-docs` repository cloned as a sibling folder to your current directory, you can use the following
+command to generate updated documentation:
+
+```shell
+./scripts/gendoc.py src/aleph_client/__main__.py docs \
+    --name aleph --title 'Aleph CLI Documentation' \
+    --output ../aleph-docs/docs/tools/aleph-client/usage.md
+```
+
+Then, open a Pull Request (PR) on the [aleph-docs](https://github.com/aleph-im/aleph-docs/pulls) repository with your changes.
