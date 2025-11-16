@@ -195,9 +195,10 @@ aleph-managerGUI/
 ├── assets/                       # 资源文件
 │   ├── aleph_managerGUI.ico      # 程序图标
 └── tools/                        # 工具目录
-    ├── aleph_py/                 # Aleph 命令行客户端目录
-    │   └── aleph_py.exe          # Windows 版 Aleph 命令行客户端
-    └── private-keys/             # 私钥存储目录
+    └── aleph_py/                 # Aleph 命令行客户端目录
+        ├── aleph_py.exe          # Windows 版 Aleph 命令行客户端
+        └── .aleph-im/            # Aleph 主目录（自动生成）
+            └── private-keys/     # 私钥存储目录
 ```
 
 ---
