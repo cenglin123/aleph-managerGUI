@@ -18,7 +18,7 @@ else:  # 在开发环境中运行
 class AlephManager:
     def __init__(self, root):
         self.root = root
-        self.root.title("Aleph 分享助手-v1.1.0-作者：层林尽染")
+        self.root.title("Aleph 分享助手-v1.1.1-作者：层林尽染")
         self.root.geometry("700x720")
         self.app_path = application_path
 
@@ -27,8 +27,8 @@ class AlephManager:
         if os.path.exists(self.icon_path):
             self.root.iconbitmap(self.icon_path)
 
-        # 设置 aleph_py.exe 文件的路径
-        self.aleph_exe_path = os.path.join(self.app_path, "tools", "aleph_py", "aleph_py.exe")
+        # 设置 aleph.exe 文件的路径
+        self.aleph_exe_path = os.path.join(self.app_path, "tools", "aleph.exe")
 
         # 创建一个样式
         style = ttk.Style()
@@ -120,8 +120,9 @@ class AlephManager:
         self.status_var = tk.StringVar()
         self.status_var.set("准备就绪")
         ttk.Label(main_frame, textvariable=self.status_var, relief=tk.SUNKEN, anchor=tk.W).pack(fill=tk.X, pady=5)
-        
+
         # 初始化
+        self.ensure_config_directory()  # 确保配置目录存在
         self.refresh_accounts()
     
     def run_command(self, command, input_text=None):
@@ -153,6 +154,12 @@ class AlephManager:
             env = os.environ.copy()
             env["PYTHONIOENCODING"] = "utf-8"
             env["PYTHONUTF8"] = "1"
+
+            # 设置 Aleph 配置目录到 tools\.aleph-im
+            aleph_config_home = os.path.join(self.app_path, "tools", ".aleph-im")
+            env["ALEPH_CONFIG_HOME"] = aleph_config_home
+            env["HOME"] = os.path.join(self.app_path, "tools")
+            env["USERPROFILE"] = os.path.join(self.app_path, "tools")
 
             # 创建进程，明确指定编码为utf-8
             process = subprocess.Popen(
@@ -413,10 +420,10 @@ class AlephManager:
                     if "Invalid file index" in stderr or stderr.strip() == "":
                         # 尝试备用方法：直接指定私钥路径
                         self.log("索引无效，尝试直接指定私钥路径")
-                        
-                        wsl_username = self.get_wsl_username()
-                        key_path = f"/home/{wsl_username}/.aleph-im/private-keys/{account_name}.key"
-                        
+
+                        # 使用 Windows 路径
+                        key_path = os.path.join(self.app_path, "tools", ".aleph-im", "private-keys", f"{account_name}.key")
+
                         command = [self.aleph_exe_path, "account", "config", key_path, "ETH"]
                         stdout, stderr, returncode = self.run_command(command)
                         
@@ -478,51 +485,34 @@ class AlephManager:
         def delete_account_thread():
             try:
                 self.status_var.set(f"正在删除账户: {account_name}...")
-                # 获取WSL用户名
-                wsl_username = self.get_wsl_username()
-                if not wsl_username:
-                    self.log("无法获取WSL用户名")
-                    self.root.after(0, lambda: self.status_var.set("删除账户失败：无法获取WSL用户名"))
-                    return
 
-                # 构建可能的账户路径
-                path = f"/home/{wsl_username}/.aleph-im/private-keys/{account_name}.key"
-                self.log(f"尝试删除文件: {path}")
+                # 使用 Windows 路径
+                key_path = os.path.join(self.app_path, "tools", ".aleph-im", "private-keys", f"{account_name}.key")
+                self.log(f"尝试删除文件: {key_path}")
 
-                # 首先检查文件是否存在
-                check_command = f"wsl test -f \"{path}\" && echo 'File exists' || echo 'File not found'"
-                stdout, stderr, returncode = self.run_command(check_command)
-                if "File exists" in stdout:
+                # 检查文件是否存在
+                if os.path.exists(key_path):
                     self.log("文件存在，尝试删除...")
-                    # 使用强制删除选项
-                    command = f"wsl rm -f \"{path}\""
-                    stdout, stderr, returncode = self.run_command(command)
-
-                    # 再次检查文件是否已删除
-                    check_again = f"wsl test -f \"{path}\" && echo 'Still exists' || echo 'Deleted'"
-                    stdout, stderr, returncode = self.run_command(check_again)
-                    if "Deleted" in stdout:
+                    try:
+                        os.remove(key_path)
                         self.log("文件已成功删除")
                         self.root.after(0, lambda: self.status_var.set(f"成功删除账户: {account_name}"))
                         # 延迟刷新以确保系统有时间处理删除
                         self.root.after(1000, self.refresh_accounts)
-                    else:
-                        self.log("文件删除后仍然存在，尝试使用sudo")
-                        # 尝试使用 sudo 删除（可能需要密码）
-                        command = f"wsl sudo rm -f \"{path}\""
-                        stdout, stderr, returncode = self.run_command(command)
-                        self.root.after(1000, self.refresh_accounts)
+                    except PermissionError:
+                        self.log("删除失败：权限不足")
+                        self.root.after(0, lambda: self.status_var.set("删除账户失败：权限不足"))
+                        self.root.after(0, lambda: messagebox.showerror("错误", "删除账户失败：权限不足，请以管理员身份运行程序"))
+                    except Exception as e:
+                        self.log(f"删除文件时出错: {str(e)}")
+                        self.root.after(0, lambda: self.status_var.set("删除账户失败"))
                 else:
-                    self.log(f"文件不存在: {path}")
-                    # 尝试使用不同的文件名格式或路径
-                    alt_path = f"/home/{wsl_username}/.aleph-im/private-keys/{account_name}.key"
-                    self.log(f"尝试备用路径: {alt_path}")
-                    command = f"wsl rm -f \"{alt_path}\""
-                    self.run_command(command)
-                    # 可能需要强制刷新 aleph 配置
-                    command = [self.aleph_exe_path, "account", "config", account_name == "cenglin123" and "cenglin1231" or "cenglin123"]
-                    self.run_command(command)
+                    self.log(f"文件不存在: {key_path}")
+                    self.root.after(0, lambda: self.status_var.set(f"账户文件不存在"))
+                    self.root.after(0, lambda: messagebox.showwarning("警告", f"账户文件不存在: {key_path}"))
+                    # 尝试刷新账户列表
                     self.root.after(1000, self.refresh_accounts)
+
             except Exception as e:
                 error_msg = f"删除账户时出错: {str(e)}"
                 self.log(error_msg)
@@ -532,14 +522,62 @@ class AlephManager:
         thread.daemon = True
         thread.start()
 
-    def get_wsl_username(self):
-        """获取用户名（从环境变量获取）"""
+    def ensure_config_directory(self):
+        """确保 Aleph 配置目录存在，并尝试迁移旧的用户目录配置"""
         try:
-            # 从系统环境变量获取当前用户名
-            return os.getenv('USERNAME', 'default_user')
+            config_dir = os.path.join(self.app_path, "tools", ".aleph-im")
+            private_keys_dir = os.path.join(config_dir, "private-keys")
+
+            # 创建配置目录（如果不存在）
+            os.makedirs(config_dir, exist_ok=True)
+            os.makedirs(private_keys_dir, exist_ok=True)
+
+            self.log(f"配置目录已确认: {config_dir}")
+
+            # 尝试从用户目录迁移旧配置
+            self.migrate_old_config(config_dir, private_keys_dir)
+
+            return config_dir
         except Exception as e:
-            self.log(f"获取用户名时出错: {str(e)}")
-            return "default_user"
+            self.log(f"创建配置目录时出错: {str(e)}")
+            return None
+
+    def migrate_old_config(self, new_config_dir, new_private_keys_dir):
+        """尝试从用户目录迁移旧的配置文件"""
+        try:
+            # 检查用户目录下是否有旧配置
+            user_home = os.path.expanduser("~")
+            old_config_dir = os.path.join(user_home, ".aleph-im")
+            old_private_keys_dir = os.path.join(old_config_dir, "private-keys")
+
+            if not os.path.exists(old_config_dir):
+                return  # 没有旧配置需要迁移
+
+            self.log(f"发现用户目录下的旧配置: {old_config_dir}")
+
+            # 迁移 config.json
+            old_config_file = os.path.join(old_config_dir, "config.json")
+            new_config_file = os.path.join(new_config_dir, "config.json")
+            if os.path.exists(old_config_file) and not os.path.exists(new_config_file):
+                import shutil
+                shutil.copy2(old_config_file, new_config_file)
+                self.log(f"已迁移配置文件: config.json")
+
+            # 迁移私钥文件
+            if os.path.exists(old_private_keys_dir):
+                import shutil
+                for filename in os.listdir(old_private_keys_dir):
+                    if filename.endswith(".key") or filename.endswith(".mnemonic"):
+                        old_file = os.path.join(old_private_keys_dir, filename)
+                        new_file = os.path.join(new_private_keys_dir, filename)
+                        if not os.path.exists(new_file):
+                            shutil.copy2(old_file, new_file)
+                            self.log(f"已迁移密钥文件: {filename}")
+
+            self.log("配置迁移完成")
+
+        except Exception as e:
+            self.log(f"迁移旧配置时出错: {str(e)}")
 
     # 添加显示文件列表方法
     def show_file_list(self):
@@ -1278,15 +1316,15 @@ class AlephManager:
 def main():
     root = tk.Tk()
 
-    # 先构建 aleph_py.exe 路径
-    aleph_exe_path = os.path.join(application_path, "tools", "aleph_py", "aleph_py.exe")
+    # 先构建 aleph.exe 路径
+    aleph_exe_path = os.path.join(application_path, "tools", "aleph.exe")
 
-    # 检查 aleph_py.exe 是否存在
+    # 检查 aleph.exe 是否存在
     if not os.path.exists(aleph_exe_path):
         messagebox.showerror(
             "错误",
-            "在 tools\\aleph_py 目录下找不到 aleph_py.exe 文件！\n\n"
-            "请确保 aleph_py.exe 文件在本程序目录下的 tools\\aleph_py 文件夹中。"
+            "在 tools 目录下找不到 aleph.exe 文件！\n\n"
+            "请确保 aleph.exe 文件在本程序目录下的 tools 文件夹中。"
         )
         return
     

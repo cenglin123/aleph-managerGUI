@@ -4,3 +4,11 @@
 /aleph_managerGUI.exe
 /zip
 /aleph_managerGUI
+tools/.aleph-im/config.json
+.gitignore
+tools/.aleph-im/private-keys/234.key
+.gitignore
+tools/.aleph-im/private-keys/cenglin1231.key
+tools/.aleph-im/private-keys/default.key
+tools/.aleph-im/private-keys/123.key
+.claude/settings.local.json
